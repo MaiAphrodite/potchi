@@ -71,7 +71,9 @@
   /* Cream-white opaque background so cards are readable over the page bg */
   background-color: rgba(255, 250, 240, 0.98);
   border-radius: 12px;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  /* subtle outline to help cards read on varied backgrounds */
+  border: 1px solid rgba(0,0,0,0.06);
   overflow: hidden;
   transition: background-color 200ms ease, transform 200ms ease;
 }
@@ -91,17 +93,59 @@
   background-color: rgba(255, 250, 240, 0.98);
   border-radius: 10px;
   padding: 1.25rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+  /* visible outline for clarity against backgrounds */
+  border: 1px solid rgba(0,0,0,0.08);
   min-height: 110px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
+/* stronger outline on hover / keyboard focus for accessibility */
+.sub-card:hover,
+.sub-card:focus-within {
+  border-color: rgba(0,0,0,0.14);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
 .left-card {
   /* left column that spans vertically */
   height: 100%;
   overflow: hidden;
+}
+
+/* Left-card layout: header, bars, separator, and flexible empty area */
+.left-card.sub-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 1rem;
+}
+.left-card .stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.left-card .stats-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(0,0,0,0.85);
+}
+.left-card .stats-bars {
+  display: flex;
+  flex-direction: column;
+}
+.left-card .left-separator {
+  height: 1px;
+  background: rgba(0,0,0,0.06);
+  margin: 14px 0;
+  border-radius: 2px;
+}
+.left-card .left-bottom-empty {
+  flex: 1; /* take remaining vertical space and remain empty for now */
 }
 
 .right-column {
@@ -130,6 +174,14 @@
   height: 100%;
   padding-top: 1rem;
   padding-bottom: 1rem;
+}
+
+/* Use a background image for the top-right card (art + subtle cream overlay for legibility) */
+.right-top-card.sub-card {
+  background-image: url('/images/bg_pot.png');
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 .right-bottom-card { flex: 0 0 30%; }
 
@@ -264,6 +316,59 @@
   opacity: 0.98;
 }
 
+/* sensor icon interactivity: allow pointer events and highlight on hover */
+.component-icon.sensor-icon {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 360ms ease, filter 360ms ease;
+  will-change: transform, box-shadow, filter;
+  touch-action: manipulation;
+}
+.component-icon.sensor-icon {
+  /* sensor icons respond only to click; hover selectors removed to avoid jitter */
+  pointer-events: auto;
+  cursor: pointer;
+  transition: box-shadow 200ms ease, filter 200ms ease;
+  will-change: box-shadow, filter;
+  touch-action: manipulation;
+}
+
+/* Separate highlight overlay placed inside the wrapper — positioned via inline style */
+.sensor-highlight {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 14px;
+  border: 2px solid rgba(66,153,225,0.16);
+  box-shadow: 0 12px 28px rgba(66,153,225,0.08), inset 0 0 24px rgba(66,153,225,0.03);
+  background: linear-gradient(180deg, rgba(66,153,225,0.04), rgba(66,153,225,0.02));
+  opacity: 0;
+  transform-origin: center center;
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(.2,.9,.2,1);
+}
+
+/* Left-bottom sensor info panel */
+.left-bottom-empty {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 64px;
+  padding-top: 0.25rem;
+}
+.sensor-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sensor-info-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+.sensor-info-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px }
+.sensor-info-desc { font-size: 0.85rem; color: rgba(0,0,0,0.65); max-width: 240px }
+
 /* Buzzer gets its own scaling/offset variables so it can be tweaked separately */
 .buzzer-icon {
   transform: translateX(calc(-50% + var(--buzzer-offset-x, 36px))) translateY(var(--buzzer-offset-y, 56px)) scale(var(--buzzer-scale, 0.18)) rotate(var(--buzzer-rotate, 0deg));
@@ -355,4 +460,8 @@
 }
 .right-bottom-card button:hover {
   opacity: 0.9;
+}
+/* Smooth background transitions for pulse effect */
+.right-bottom-card button {
+  transition: background-color 1.6s ease, opacity 220ms ease;
 }
