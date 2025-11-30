@@ -113,7 +113,7 @@ const usePlantStore = create((set, get) => ({
       return { emoji: '(｡•́_•̀｡)', label: 'Cold' }
     }
     if (lightExposure < 200) {
-      return { emoji: '(－ω－) zzZ', label: 'Sleepy' }
+      return { emoji: '(－ω－)', label: 'Sleepy' }
     }
     return { emoji: '(◕‿◕)', label: 'Happy' }
   },

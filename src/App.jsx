@@ -274,7 +274,7 @@ function App() {
       return { emoji: '(｡•́_•̀｡)', label: 'Cold' }
     }
     if (lightExposure < 200) {
-      return { emoji: '(－ω－) zzZ', label: 'Sleepy' }
+      return { emoji: '(－ω－)', label: 'Sleepy' }
     }
     return { emoji: '(◕‿◕)', label: 'Happy' }
   }, [moisture, temperature, lightExposure])
@@ -288,6 +288,8 @@ function App() {
       {/* Title area: 10% of big-card height */}
       <div className="title">
         <img src="/images/title_potchi.png" alt="Potchi title" className="title-image" />
+        {/* small subtitle placed visually under the title image without affecting layout */}
+        <div className="title-subtext">Your Plant Best Friend!</div>
       </div>
       <div className="container">
         <div className="left-card sub-card">

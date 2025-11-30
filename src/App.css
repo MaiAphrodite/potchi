@@ -66,10 +66,25 @@
   max-width: 50%;
 }
 
+/* Overlay title placed over the title image; absolute so layout is unaffected */
+.title {
+  position: relative;
+}
+.title-subtext {
+  position: absolute;
+  left: 50%;
+  top: calc(62% + 10px); /* moved down 10px */
+  transform: translateX(-50%);
+  pointer-events: none;
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.7);
+  font-weight: 600;
+}
+
 /* Make big-card visually a card */
 .big-card {
-  /* Cream-white opaque background so cards are readable over the page bg */
-  background-color: rgba(255, 250, 240, 0.98);
+  /* Cream-white background with 70% opacity so container is slightly transparent */
+  background-color: rgba(255, 250, 240, 0.7);
   border-radius: 12px;
   box-shadow: 0 6px 14px rgba(0,0,0,0.12);
   /* subtle outline to help cards read on varied backgrounds */
@@ -117,17 +132,27 @@
 
 /* Left-card layout: header, bars, separator, and flexible empty area */
 .left-card.sub-card {
+  --frame-inset-x: 20px; /* horizontal inset to place content inside the light panel */
+  --frame-inset-y: 18px; /* vertical inset for top/bottom */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 1rem;
+  /* base padding plus frame inset so content stays inside the lighter central area */
+  padding: calc(0.9rem + var(--frame-inset-y)) calc(0.9rem + var(--frame-inset-x));
+  /* keep the frame artwork as background */
+  background-image: url('/images/stats_bg.png');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 .left-card .stats-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center; /* center the title */
   gap: 0.5rem;
   margin-bottom: 0.6rem;
+  /* nudge header down to better align inside the frame artwork */
+  margin-top: 19px; /* adjusted to 19px per request */
 }
 .left-card .stats-title {
   font-size: 1rem;
@@ -185,6 +210,15 @@
 }
 .right-bottom-card { flex: 0 0 30%; }
 
+/* bottom-right controls card background (button artwork) */
+.right-bottom-card.sub-card {
+  background-image: url('/images/button_bg.png');
+  background-position: center center;
+  background-repeat: no-repeat;
+  /* stretch horizontally to fill the card while keeping aspect ratio */
+  background-size: 100% auto;
+}
+
 /* Responsiveness: stack into single column on narrow screens */
 @media (max-width: 900px) {
   .big-card .container {
@@ -213,19 +247,24 @@
 
 .progress-row {
   margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* center the label + bar group */
 }
-.progress-label {
+.left-card .progress-label {
+  width: var(--progress-width, 78%);
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
   margin-bottom: 6px;
 }
-.progress-bar-outer {
-  width: 100%;
+.left-card .progress-bar-outer {
+  width: var(--progress-width, 78%);
   height: 12px;
   background: rgba(0,0,0,0.08);
   border-radius: 8px;
   overflow: hidden;
+  margin: 0 auto; /* center the bar */
 }
 .progress-bar-inner {
   height: 100%;
@@ -250,8 +289,10 @@
   flex-direction: column;
 }
 .mood-details {
-  font-size: 0.85rem;
-  color: rgba(0,0,0,0.6);
+  font-size: 1.18rem; /* slightly bigger */
+  font-weight: 700; /* bold */
+  color: rgb(255, 255, 255);
+  margin-bottom: -10px; /* nudge down a few pixels */
 }
 
 /* Pot + Plant stacking helper
@@ -355,19 +396,28 @@
   padding-top: 0.25rem;
 }
 .sensor-info {
+  /* stack image above text and center everything, constrained to progress width */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  text-align: center;
+  gap: 8px;
+  width: var(--progress-width, 78%);
+  margin: 0 auto;
 }
 .sensor-info-img {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  margin-top: 4px;
 }
-.sensor-info-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px }
-.sensor-info-desc { font-size: 0.85rem; color: rgba(0,0,0,0.65); max-width: 240px }
+.sensor-info-body {
+  width: 100%;
+}
+.sensor-info-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px }
+.sensor-info-desc { font-size: 0.86rem; color: rgba(0,0,0,0.65); max-width: 100%; margin: 0 auto }
 
 /* Buzzer gets its own scaling/offset variables so it can be tweaked separately */
 .buzzer-icon {
