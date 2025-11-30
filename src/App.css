@@ -1,9 +1,11 @@
-/* wrapper for the whole app (keeps background showing at left/right) */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  /* Make root full-width so the `.big-card` can control the side padding */
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -21,9 +23,8 @@
 
 @keyframes logo-spin {
   from {
-    transform: rotate(0deg);
-  }
-  to {
+  font-size: 0.85rem;
+  color: #000;
     transform: rotate(360deg);
   }
 }
@@ -38,32 +39,320 @@
   padding: 2em;
 }
 
-.read-the-docs {
-  color: #888;
-}
-
-/* App-specific layout */
-.app-root {
-  width: 100%;
+/* Big-card: full width, with 10% side padding on left and right, and safe box-sizing */
+.big-card {
+  /* shrink the visual card to show the bg on left/right with 10% margins */
+  width: calc(100% - 20%);
+  margin: 0 10%; /* no top/bottom margin so the card sits flush with viewport */
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+  height: 100vh; /* occupy the full viewport height */
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-.app-header {
-  max-width: 1200px;
-  width: 100%;
-  padding-left: 10%;
-  padding-right: 10%;
-  box-sizing: border-box;
-  text-align: left;
-  margin-top: 2.25rem;
-  margin-bottom: 1.25rem;
-}
-.app-header h1 {
-  margin: 0 0 0.25rem 0;
-}
-.subtitle {
-  margin: 0;
-  color: #b9b9b9;
+  overflow: hidden;
 }
 
+/* Title (top) 10% height and centered */
+.big-card .title {
+  flex: 0 0 5%; /* user requested smaller header: 5% of big-card height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.title-image {
+  height: 35%;
+  width: auto;
+  object-fit: contain;
+  max-width: 50%;
+}
+
+/* Make big-card visually a card */
+.big-card {
+  /* Cream-white opaque background so cards are readable over the page bg */
+  background-color: rgba(255, 250, 240, 0.98);
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  overflow: hidden;
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+
+/* Layout grid inside the big card */
+  .big-card .container {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: 1rem;
+    align-items: stretch; /* ensure the right column fills vertically */
+    flex: 1;
+  }
+
+/* Generic sub-card styling */
+.sub-card {
+  /* Make sub-cards cream and opaque to contrast the background image */
+  background-color: rgba(255, 250, 240, 0.98);
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.left-card {
+  /* left column that spans vertically */
+  height: 100%;
+  overflow: hidden;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  overflow: hidden;
+}
+
+.right-top-card, .right-bottom-card {
+  height: 100%;
+}
+
+/* Right column fixed split: 70% top / 30% bottom of the big card */
+.right-top-card { flex: 0 0 70%; }
+
+/* Center content of the top-right card horizontally and vertically */
+.right-top-card.sub-card {
+  overflow: hidden; /* clip any overflow so no scrollbars appear */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* header top, mood center, details bottom */
+  align-items: center; /* center horizontally */
+  text-align: center; /* center text inside children */
+  height: 100%;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.right-bottom-card { flex: 0 0 30%; }
+
+/* Responsiveness: stack into single column on narrow screens */
+@media (max-width: 900px) {
+  .big-card .container {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .left-card { min-height: 200px }
+  /* narrow screen: reduce margins so the card can use more space */
+  .big-card { width: calc(100% - 8%); margin: 1rem 4%; padding: 1rem }
+}
+
+/* Colour adjustments for light mode so subtle backgrounds remain visible */
+@media (prefers-color-scheme: light) {
+  .big-card { background-color: rgba(255, 250, 240, 0.98); box-shadow: 0 10px 24px rgba(0,0,0,0.05); }
+  .sub-card { background-color: rgba(255, 250, 240, 0.98); box-shadow: 0 5px 12px rgba(0,0,0,0.06); color: #000 }
+  .mood-details { color: rgba(0,0,0,0.6); }
+}
+
+/* Small visual tweaks to logos inside sub-cards */
+.left-card .logo { height: 5.2em; }
+
+.left-card h1 { margin-top: 0.6rem }
+
+/* .read-the-docs removed intentionally in JSX; keeping the rule commented for future use */
+/* .read-the-docs { color: #888 } */
+
+.progress-row {
+  margin-bottom: 12px;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+.progress-bar-outer {
+  width: 100%;
+  height: 12px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.progress-bar-inner {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+/* Mood / expression styles */
+.mood-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  justify-content: center; /* center the emoji + label horizontally */
+}
+.mood-emoji {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+.mood-label {
+  display: flex;
+  flex-direction: column;
+}
+.mood-details {
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.6);
+}
+
+/* Pot + Plant stacking helper
+   Place `potchi_pot.png` and `potchi_plant.png` in `public/images/`.
+   To adjust overlay, tweak the CSS variables on `.pot-stack`:
+     --plant-offset-x : horizontal offset (e.g. '8px' moves right)
+     --plant-offset-y : vertical offset used in translateY (e.g. '-28px' moves up)
+   You can set them inline in JSX or in CSS, e.g.
+     <div className="pot-stack" style={{ '--plant-offset-x': '4px', '--plant-offset-y': '-32px' }}>
+*/
+.pot-stack {
+  /* default offsets (can be overridden) */
+  --plant-offset-x: 0px;
+  --plant-offset-y: -28px;
+  --pot-offset-y: 90px; /* moves the pot down (positive -> down) */
+  --stack-offset-y: 0px; /* moves the whole stack (positive -> down) */
+  position: relative;
+  /* scale container 1.5x (Option A) */
+  width: 270px; /* 180 * 1.5 */
+  height: 240px; /* 160 * 1.5 */
+  margin: 0 auto 0.5rem auto;
+  transform: translateY(var(--stack-offset-y));
+  max-width: 100%;
+  max-height: 100%;
+}
+.pot-stack-wrapper {
+  /* Fill the top card area */
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end; /* keep pot at bottom */
+  justify-content: center;
+  overflow: hidden; /* don't let the overlays create scrollbars */
+}
+
+/* Cross-section: sits behind the pot (lower z-index) but can be revealed when pot hidden */
+.cross-section {
+  position: absolute;
+  left: 50%;
+  /* sit at the bottom like the pot so it's revealed naturally when the pot is hidden */
+  bottom: 0;
+  transform: translateX(-50%) translateY(var(--cross-offset-y, 0px)) scale(var(--cross-scale, 1)) rotate(var(--cross-rotate, 0deg));
+  z-index: 0;
+  pointer-events: none;
+  width: min(35%, 720px);
+  height: auto;
+  opacity: 1;
+}
+
+/* Component icons (buzzer, ESP32, sensors) — placed in front of cross-section but behind pot */
+.component-icon {
+  position: absolute;
+  left: 50%;
+  /* align to the bottom like the pot; use vars to nudge up/down */
+  bottom: 0;
+  transform: translateX(calc(-50% + var(--sensor-offset-x, 0px))) translateY(var(--sensor-offset-y, 0px)) scale(var(--sensor-scale, 0.14)) rotate(var(--sensor-rotate, 0deg));
+  z-index: 1; /* in front of cross-section, behind pot (pot will have higher z-index) */
+  pointer-events: none;
+  width: auto;
+  height: auto;
+  opacity: 0.98;
+}
+
+/* Buzzer gets its own scaling/offset variables so it can be tweaked separately */
+.buzzer-icon {
+  transform: translateX(calc(-50% + var(--buzzer-offset-x, 36px))) translateY(var(--buzzer-offset-y, 56px)) scale(var(--buzzer-scale, 0.18)) rotate(var(--buzzer-rotate, 0deg));
+}
+.esp32-icon {
+  transform: translateX(calc(-50% + var(--esp32-offset-x, -60px))) translateY(var(--esp32-offset-y, 30px)) scale(var(--esp32-scale, var(--sensor-scale, 0.14))) rotate(var(--esp32-rotate, var(--sensor-rotate, 0deg)));
+}
+.bh1750-icon {
+  transform: translateX(calc(-50% + var(--bh1750-offset-x, -20px))) translateY(var(--bh1750-offset-y, 20px)) scale(var(--bh1750-scale, var(--sensor-scale, 0.14))) rotate(var(--bh1750-rotate, var(--sensor-rotate, 0deg)));
+}
+.dht22-icon {
+  transform: translateX(calc(-50% + var(--dht22-offset-x, 12px))) translateY(var(--dht22-offset-y, 8px)) scale(var(--dht22-scale, var(--sensor-scale, 0.14))) rotate(var(--dht22-rotate, var(--sensor-rotate, 0deg)));
+}
+.soil-icon {
+  transform: translateX(calc(-50% + var(--soil-offset-x, 44px))) translateY(var(--soil-offset-y, 6px)) scale(var(--soil-scale, var(--sensor-scale, 0.14))) rotate(var(--soil-rotate, var(--sensor-rotate, 0deg)));
+}
+
+/* Pot base: fixed to the bottom center of the wrapper */
+.pot-base {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%) translateY(var(--pot-offset-y)) rotate(var(--pot-rotate, 0deg));
+  width: min(52%, 320px); /* responsive width */
+  height: auto;
+  z-index: 2; /* sit above components and cross-section */
+}
+
+/* Plant overlay: positioned above the pot, movable via vars */
+.pot-plant-overlay {
+  position: absolute;
+  left: 50%;
+  /* bottom is relative to wrapper: tune via var */
+  bottom: calc(28% + var(--plant-offset-y, -40px));
+  transform: translateX(calc(-50% + var(--plant-offset-x, 0px)));
+  width: min(42%, 260px);
+  height: auto;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Mood overlay: center on the pot; fine-tune with vars */
+.mood-overlay {
+  position: absolute;
+  left: 50%;
+  bottom: calc(12% + var(--mood-offset-y, -28px));
+  transform: translateX(calc(-50% + var(--mood-offset-x, 0px)));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 4; /* above plant */
+  pointer-events: none;
+  color: #000; /* render kaomoji in black */
+}
+
+.mood-overlay .mood-emoji { font-size: 1.8rem; line-height: 1; color: #000 }
+.mood-overlay .mood-label strong { font-weight: 700 }
+.pot-stack img {
+  position: absolute;
+  left: 50%;
+  pointer-events: none;
+  user-select: none;
+  max-width: 100%;
+}
+.pot-stack .pot-base {
+  bottom: 0;
+  transform: translateX(-50%) translateY(var(--pot-offset-y)) rotate(var(--pot-rotate, 0deg));
+  z-index: 1;
+  width: 100%;
+  height: auto;
+}
+.pot-stack .pot-plant {
+  bottom: 0;
+  /* compute horizontal/vertical offset using CSS variables */
+  transform: translateX(calc(-50% + var(--plant-offset-x))) translateY(var(--plant-offset-y)) rotate(var(--plant-rotate, 0deg));
+  z-index: 2;
+  width: 78%;
+  height: auto;
+}
+
+/* small adjustments for buttons in controls */
+.right-bottom-card button {
+  padding: 6px 10px;
+  background: #4ECDC4;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  cursor: pointer;
+}
+.right-bottom-card button:hover {
+  opacity: 0.9;
+}
