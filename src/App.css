@@ -96,9 +96,10 @@
 /* Layout grid inside the big card */
   .big-card .container {
     display: grid;
-    grid-template-columns: 30% 70%;
+    /* keep left column within sensible bounds across sizes */
+    grid-template-columns: clamp(260px, 30%, 420px) 1fr;
     gap: 1rem;
-    align-items: stretch; /* ensure the right column fills vertically */
+    align-items: start; /* allow children to size naturally */
     flex: 1;
   }
 
@@ -110,7 +111,7 @@
   padding: 1.25rem;
   box-shadow: 0 2px 6px rgba(0,0,0,0.10);
   /* visible outline for clarity against backgrounds */
-  border: 1px solid rgba(0,0,0,0.08);
+  overflow: visible;
   min-height: 110px;
   display: flex;
   flex-direction: column;
@@ -199,6 +200,8 @@
   height: 100%;
   padding-top: 1rem;
   padding-bottom: 1rem;
+  /* keep a consistent canvas for the stack across resolutions */
+  min-height: clamp(360px, 48vh, 560px);
 }
 
 /* Use a background image for the top-right card (art + subtle cream overlay for legibility) */
@@ -327,6 +330,21 @@
   align-items: flex-end; /* keep pot at bottom */
   justify-content: center;
   overflow: hidden; /* don't let the overlays create scrollbars */
+  /* avoid overstretching at very wide screens */
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Inner fixed-size design frame that scales uniformly */
+.stack-scale-frame {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%) scale(var(--stack-scale, 1));
+  transform-origin: center bottom;
+  width: 860px;   /* design width */
+  height: 520px;  /* design height */
 }
 
 /* Cross-section: sits behind the pot (lower z-index) but can be revealed when pot hidden */

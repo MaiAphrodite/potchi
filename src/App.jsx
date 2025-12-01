@@ -58,6 +58,7 @@ function App() {
   const [hidePot, setHidePot] = useState(false)
   const [hoveredSensor, setHoveredSensor] = useState(null)
   const potWrapperRef = useRef(null)
+  const stackFrameRef = useRef(null)
   const sensorRefs = {
     buzzer: useRef(null),
     esp32: useRef(null),
@@ -117,7 +118,8 @@ function App() {
         return
       }
       const ref = sensorRefs[hoveredSensor]
-      const wrapper = potWrapperRef.current
+      // anchor overlay positioning to the inner scaled frame so transforms are consistent
+      const wrapper = stackFrameRef.current
       if (!ref || !ref.current || !wrapper) {
         setHighlightStyle({ opacity: 0 })
         return
@@ -171,6 +173,28 @@ function App() {
     }
   }, [hoveredSensor])
 
+  // Keep the inner stack at a fixed design size and scale to fit the wrapper
+  useEffect(() => {
+    const wrapper = potWrapperRef.current
+    const frame = stackFrameRef.current
+    if (!wrapper || !frame) return
+    const DESIGN_W = 860
+    const DESIGN_H = 520
+    function updateScale() {
+      const rect = wrapper.getBoundingClientRect()
+      const scale = Math.max(0.1, Math.min(rect.width / DESIGN_W, rect.height / DESIGN_H))
+      frame.style.setProperty('--stack-scale', String(scale))
+    }
+    updateScale()
+    const ro = new ResizeObserver(() => updateScale())
+    ro.observe(wrapper)
+    window.addEventListener('resize', updateScale)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', updateScale)
+    }
+  }, [])
+
   // compute non-transparent pixel bounds for an image element and store
   function computeImageAlphaBounds(sensorKey) {
     const ref = sensorRefs[sensorKey]
@@ -220,10 +244,10 @@ function App() {
     }
   }
 
-  // clear sensor highlight when clicking outside the pot wrapper
+  // clear sensor highlight when clicking outside the scaled stack frame
   useEffect(() => {
     function onDocPointer(e) {
-      const wrapper = potWrapperRef.current
+      const wrapper = stackFrameRef.current
       if (!wrapper) return
       if (!wrapper.contains(e.target)) {
         setHoveredSensor(null)
@@ -369,16 +393,16 @@ function App() {
               ref={potWrapperRef}
               style={{
                 '--plant-offset-x': '-3px',
-                '--plant-offset-y': '50px',
+                '--plant-offset-y': '15px',
                 '--mood-offset-x': '0px',
-                '--mood-offset-y': '20px',
+                '--mood-offset-y': '7px',
                 /* Defaults for new components: tweak these inline or via CSS */
                 '--cross-scale': '1',
                 '--cross-offset-x': '0px',
                 '--cross-offset-y': '0px',
                 '--pot-offset-y': '20px',
                 '--buzzer-scale': '0.04',
-                '--buzzer-offset-x': '110px',
+                '--buzzer-offset-x': '90px',
                 '--buzzer-offset-y': '250px',
                   /* generic sensor defaults (used as fallbacks) */
                   '--sensor-scale': '0.14',
@@ -389,7 +413,7 @@ function App() {
                   '--esp32-offset-y': '234px',
                   '--esp32-scale': '0.090',
                   '--bh1750-offset-x': '-55px',
-                  '--bh1750-offset-y': '120px',
+                  '--bh1750-offset-y': '130px',
                   '--bh1750-scale': '0.070',
                   '--dht22-offset-x': '70px',
                   '--dht22-offset-y': '-65px',
@@ -409,20 +433,21 @@ function App() {
                   '--plant-rotate': '0deg',
               }}
             >
-              {/* cross-section under the pot (always present, behind the pot) */}
-              <img src="/images/cross_section.png" alt="cross section" className="cross-section" />
+              <div className="stack-scale-frame" ref={stackFrameRef}>
+                {/* cross-section under the pot (always present, behind the pot) */}
+                <img src="/images/cross_section.png" alt="cross section" className="cross-section" />
 
-              {/* pot is fixed at the bottom center; hidden when toggled */}
-              {!hidePot && (
-                <img src="/images/potchi_pot.png" alt="pot" className="pot-base" />
-              )}
+                {/* pot is fixed at the bottom center; hidden when toggled */}
+                {!hidePot && (
+                  <img src="/images/potchi_pot.png" alt="pot" className="pot-base" />
+                )}
 
-              {/* highlight overlay positioned over the hovered sensor (separate element, no hitbox changes) */}
-              <div className="sensor-highlight" style={highlightStyle} aria-hidden="true" />
-              <img src="/images/potchi_plant.png" alt="plant" className="pot-plant-overlay" />
+                {/* highlight overlay positioned over the hovered sensor (separate element, no hitbox changes) */}
+                <div className="sensor-highlight" style={highlightStyle} aria-hidden="true" />
+                <img src="/images/potchi_plant.png" alt="plant" className="pot-plant-overlay" />
 
-              {/* Small hardware/component icons placed relative to the cross-section */}
-              <img
+                {/* Small hardware/component icons placed relative to the cross-section */}
+                <img
                 src="/images/buzzer.png"
                 alt="buzzer"
                 ref={sensorRefs.buzzer}
@@ -432,7 +457,7 @@ function App() {
                 onPointerLeave={() => setHoveredSensor(null)}
                 onClick={() => setHoveredSensor((s) => (s === 'buzzer' ? null : 'buzzer'))}
               />
-              <img
+                <img
                 src="/images/MicroController_ESP32.png"
                 alt="esp32"
                 ref={sensorRefs.esp32}
@@ -442,7 +467,7 @@ function App() {
                 onPointerLeave={() => setHoveredSensor(null)}
                 onClick={() => setHoveredSensor((s) => (s === 'esp32' ? null : 'esp32'))}
               />
-              <img
+                <img
                 src="/images/Sensor_BH1750.png"
                 alt="bh1750"
                 ref={sensorRefs.bh1750}
@@ -452,7 +477,7 @@ function App() {
                 onPointerLeave={() => setHoveredSensor(null)}
                 onClick={() => setHoveredSensor((s) => (s === 'bh1750' ? null : 'bh1750'))}
               />
-              <img
+                <img
                 src="/images/Sensor_DHT22.png"
                 alt="dht22"
                 ref={sensorRefs.dht22}
@@ -462,7 +487,7 @@ function App() {
                 onPointerLeave={() => setHoveredSensor(null)}
                 onClick={() => setHoveredSensor((s) => (s === 'dht22' ? null : 'dht22'))}
               />
-              <img
+                <img
                 src="/images/Sensor_SoilMoisture.png"
                 alt="soil moisture sensor"
                 ref={sensorRefs.soil}
@@ -473,17 +498,17 @@ function App() {
                 onClick={() => setHoveredSensor((s) => (s === 'soil' ? null : 'soil'))}
               />
               {/* attach hover handlers to sensors */}
-
-              {/* mood overlay centered on the pot (movable). Hide the expression when the cross-section is revealed (pot hidden) */}
-              {/* show only the kaomoji (strip surrounding brackets if present) */}
-              {!hidePot && (() => {
-                const kaomojiOnly = currentMood.emoji.replace(/^[\(\[\{]+|[\)\]\}]+$/g, '')
-                return (
-                  <div className="mood-overlay" aria-hidden="false" title={currentMood.label}>
-                    <div className="mood-emoji">{kaomojiOnly}</div>
-                  </div>
-                )
-              })()}
+                {/* mood overlay centered on the pot (movable). Hide the expression when the cross-section is revealed (pot hidden) */}
+                {/* show only the kaomoji (strip surrounding brackets if present) */}
+                {!hidePot && (() => {
+                  const kaomojiOnly = currentMood.emoji.replace(/^[\(\[\{]+|[\)\]\}]+$/g, '')
+                  return (
+                    <div className="mood-overlay" aria-hidden="false" title={currentMood.label}>
+                      <div className="mood-emoji">{kaomojiOnly}</div>
+                    </div>
+                  )
+                })()}
+              </div>
             </div>
             <div className="mood-details">{currentMood.label}</div>
           </div>
